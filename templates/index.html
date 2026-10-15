@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Academic Performance Prediction</title>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5fb;
+            color: #202b3c;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #172554, #2563eb);
+            color: white;
+            text-align: center;
+            padding: 28px 18px;
+        }
+
+        header h1 { font-size: 28px; margin-bottom: 8px; }
+        header p { color: #dbeafe; }
+
+        .container {
+            max-width: 1050px;
+            margin: 30px auto;
+            padding: 0 18px;
+        }
+
+        .intro { text-align: center; margin-bottom: 25px; }
+        .intro h2 { color: #172554; margin-bottom: 8px; }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(30, 50, 90, 0.08);
+        }
+
+        .card h3 { color: #1d4ed8; margin-bottom: 18px; }
+
+        .form-group { margin-bottom: 17px; }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: 2px solid #93c5fd;
+            border-color: #2563eb;
+        }
+
+        .hint { display: block; color: #64748b; font-size: 12px; }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 7px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover { background: #1d4ed8; }
+
+        .result {
+            border: 1px solid #dbeafe;
+            background: #f8fbff;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .result h4 { color: #172554; margin-bottom: 8px; }
+
+        .mark { font-size: 30px; font-weight: bold; color: #2563eb; }
+
+        .category {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .empty {
+            color: #64748b;
+            text-align: center;
+            padding: 35px 10px;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 7px;
+            margin-bottom: 15px;
+        }
+
+        .note {
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            padding: 22px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 720px) {
+            .layout { grid-template-columns: 1fr; }
+            header h1 { font-size: 23px; }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Student Academic Performance Prediction</h1>
+        <p>Linear Regression &amp; Random Forest Regression</p>
+    </header>
+
+    <main class="container">
+        <section class="intro">
+            <h2>Predict Your Academic Performance</h2>
+            <p>Enter the student details to estimate final marks out of 100.</p>
+        </section>
+
+        <div class="layout">
+            <section class="card">
+                <h3>Student Details</h3>
+
+                {% if error %}
+                    <div class="error">{{ error }}</div>
+                {% endif %}
+
+                <form method="POST" action="/">
+                    <div class="form-group">
+                        <label for="attendance">Attendance (%)</label>
+                        <input type="number" id="attendance" name="attendance"
+                               min="0" max="100" step="0.1"
+                               value="{{ request.form.get('attendance', '85') }}" required>
+                        <span class="hint">Valid range: 0–100%</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="internal_marks">Internal Marks (out of 25)</label>
+                        <input type="number" id="internal_marks" name="internal_marks"
+                               min="0" max="25" step="0.5"
+                               value="{{ request.form.get('internal_marks', '20') }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="assignment_score">Assignment Score (out of 20)</label>
+                        <input type="number" id="assignment_score" name="assignment_score"
+                               min="0" max="20" step="0.5"
+                               value="{{ request.form.get('assignment_score', '16') }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="study_hours">Study Hours per Day</label>
+                        <input type="number" id="study_hours" name="study_hours"
+                               min="0" max="24" step="0.5"
+                               value="{{ request.form.get('study_hours', '3') }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="previous_grade">Previous Grade (out of 100)</label>
+                        <input type="number" id="previous_grade" name="previous_grade"
+                               min="0" max="100" step="0.5"
+                               value="{{ request.form.get('previous_grade', '70') }}" required>
+                    </div>
+
+                    <button type="submit">Predict Performance</button>
+                </form>
+            </section>
+
+            <section class="card">
+                <h3>Prediction Results</h3>
+
+                {% if prediction %}
+                    <div class="result">
+                        <h4>Linear Regression</h4>
+                        <div class="mark">{{ prediction.linear }} / 100</div>
+                        <span class="category">{{ prediction.linear_category }}</span>
+                    </div>
+
+                    <div class="result">
+                        <h4>Random Forest Regression</h4>
+                        <div class="mark">{{ prediction.forest }} / 100</div>
+                        <span class="category">{{ prediction.forest_category }}</span>
+                    </div>
+
+                    <p class="note">
+                        These predictions come from a synthetic demonstration dataset
+                        and are not validated estimates of real student performance.
+                    </p>
+                {% else %}
+                    <div class="empty">
+                        <p>Your predictions will appear here.</p>
+                        <p>Enter all five details and click Predict Performance.</p>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+
+        <p class="note">
+            Educational Data Mining | Student Academic Performance Project
+        </p>
+    </main>
+
+    <footer>
+        Student Academic Performance Prediction | Machine Learning Project
+    </footer>
+</body>
+</html>
