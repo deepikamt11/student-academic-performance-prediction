@@ -35,6 +35,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="#studentsSection">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        Students Directory
+                    </a>
+                </li>
+                <li>
                     <a href="#performanceSection">
                         <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
                         Performance
@@ -274,6 +280,86 @@
                             <div class="lbl">Students</div>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <!-- Teacher Directory & Student Academic Records Section -->
+            <section class="directory-section" id="studentsSection">
+                <div class="directory-header">
+                    <div class="directory-title-box">
+                        <div class="directory-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                        <div>
+                            <h2>Teacher Portal: Student Records Directory</h2>
+                            <p>Search by Student ID, inspect academic performance, or filter at-risk students for counseling.</p>
+                        </div>
+                    </div>
+
+                    <div class="directory-controls">
+                        <div class="search-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="studentSearchInput" placeholder="Search Student ID (e.g. STU-015)..." onkeyup="filterStudentsTable()">
+                        </div>
+
+                        <div class="filter-pills">
+                            <button type="button" class="filter-pill active" onclick="setDirectoryFilter('all', this)">All ({{ students_data|length }})</button>
+                            <button type="button" class="filter-pill" onclick="setDirectoryFilter('high-risk', this)">High Risk ({{ dashboard.mental_values[2] }})</button>
+                            <button type="button" class="filter-pill" onclick="setDirectoryFilter('dropout', this)">Dropout ({{ dashboard.dropout_count }})</button>
+                            <button type="button" class="filter-pill" onclick="setDirectoryFilter('top', this)">Top CGPA (&ge;8.0)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="student-table" id="studentsDirectoryTable">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Attendance</th>
+                                <th>Internal (/25)</th>
+                                <th>Assignment (/20)</th>
+                                <th>Study (hrs)</th>
+                                <th>Past Grade</th>
+                                <th>Final CGPA</th>
+                                <th>Status</th>
+                                <th>Risk Level</th>
+                                <th>Teacher Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in students_data %}
+                            <tr class="student-row" 
+                                data-id="{{ s.student_id }}" 
+                                data-risk="{{ s.mental_health }}" 
+                                data-status="{{ s.dropout }}" 
+                                data-cgpa="{{ s.cgpa }}">
+                                <td><span class="stu-id-tag">{{ s.student_id }}</span></td>
+                                <td><strong>{{ s.attendance }}%</strong></td>
+                                <td>{{ s.internal_marks }}</td>
+                                <td>{{ s.assignment_score }}</td>
+                                <td>{{ s.study_hours }}h</td>
+                                <td>{{ s.previous_grade }}</td>
+                                <td><strong>{{ s.cgpa }}</strong> / 10</td>
+                                <td>
+                                    <span class="badge-tag {% if s.dropout == 'Completed' %}high{% else %}low{% endif %}">
+                                        {{ s.dropout }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge-tag {% if s.mental_health == 'Low Risk' %}high{% elif s.mental_health == 'Moderate Risk' %}medium{% else %}low{% endif %}">
+                                        {{ s.mental_health }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-autofill" onclick="autofillPredictor({{ s.attendance }}, {{ s.internal_marks }}, {{ s.assignment_score }}, {{ s.study_hours }}, {{ s.previous_grade }})">
+                                        Inspect / Evaluate
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -770,6 +856,57 @@
                     }
                 }
             });
+
+            // Filter students table by search query
+            window.filterStudentsTable = function() {
+                const query = document.getElementById('studentSearchInput').value.toLowerCase().trim();
+                const rows = document.querySelectorAll('.student-row');
+                rows.forEach(row => {
+                    const id = row.getAttribute('data-id').toLowerCase();
+                    if (id.includes(query)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            };
+
+            // Filter students table by category pills
+            window.setDirectoryFilter = function(filterType, btn) {
+                document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+
+                const rows = document.querySelectorAll('.student-row');
+                rows.forEach(row => {
+                    const risk = row.getAttribute('data-risk');
+                    const status = row.getAttribute('data-status');
+                    const cgpa = parseFloat(row.getAttribute('data-cgpa'));
+
+                    if (filterType === 'all') {
+                        row.style.display = '';
+                    } else if (filterType === 'high-risk') {
+                        row.style.display = (risk === 'High Risk') ? '' : 'none';
+                    } else if (filterType === 'dropout') {
+                        row.style.display = (status === 'Dropout') ? '' : 'none';
+                    } else if (filterType === 'top') {
+                        row.style.display = (cgpa >= 8.0) ? '' : 'none';
+                    }
+                });
+            };
+
+            // Autofill student values into the predictor form
+            window.autofillPredictor = function(att, internal, assignment, study, prev) {
+                document.getElementById('attendance').value = att;
+                document.getElementById('internal_marks').value = internal;
+                document.getElementById('assignment_score').value = assignment;
+                document.getElementById('study_hours').value = study;
+                document.getElementById('previous_grade').value = prev;
+
+                const predSection = document.getElementById('predictionSection');
+                if (predSection) {
+                    predSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
         });
     </script>
 </body>

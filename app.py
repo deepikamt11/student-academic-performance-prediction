@@ -99,6 +99,10 @@ def home():
     else:
         df = base_df.copy()
 
+    df["student_id"] = [f"STU-{i+1:03d}" for i in range(len(df))]
+    df["cgpa"] = (df["final_marks"] / 10.0).round(2)
+    students_data = df.to_dict(orient="records")
+
     total_students = len(df)
     avg_marks = round(float(df["final_marks"].mean()), 2)
     avg_cgpa = round(avg_marks / 10.0, 2)
@@ -332,7 +336,8 @@ def home():
         prediction=prediction,
         error=error,
         dashboard=dashboard,
-        current_student=current_student
+        current_student=current_student,
+        students_data=students_data
     )
 
 
