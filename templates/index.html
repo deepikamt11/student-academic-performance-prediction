@@ -62,7 +62,7 @@
 
             <div class="sidebar-footer">
                 <p>Edu Data Mining System</p>
-                <p>Version 2.0</p>
+                <p>Version 2.0 (Dynamic Graphs)</p>
             </div>
         </aside>
 
@@ -84,12 +84,35 @@
                 </div>
 
                 <div class="header-actions">
+                    {% if dashboard.added_count > 0 %}
+                        <a href="/reset" class="reset-btn" title="Reset cohort back to original 200 students">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                            Reset Data (200)
+                        </a>
+                    {% endif %}
                     <span class="academic-badge">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
                         2024 - 2025
                     </span>
                 </div>
             </header>
+
+            <!-- Dynamic Live Update Notification Banner -->
+            {% if current_student %}
+                <div class="live-alert-banner">
+                    <div class="live-alert-left">
+                        <div class="live-badge-dot"></div>
+                        <div>
+                            <strong>Live Graphs Updated:</strong>
+                            New student evaluated (CGPA: <strong>{{ current_student.cgpa }}</strong>, Attendance: <strong>{{ current_student.attendance }}%</strong>, Mark: <strong>{{ current_student.mark }}/100</strong>). Placed in <strong>{{ dashboard.perf_labels[current_student.perf_bin_idx] }}</strong> range. Total Cohort: <strong>{{ dashboard.total }} Students</strong>.
+                        </div>
+                    </div>
+                    <a href="/reset" class="reset-btn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                        Reset to 200
+                    </a>
+                </div>
+            {% endif %}
 
             <!-- 5 KPI Summary Stat Cards -->
             <section class="kpi-row">
@@ -103,6 +126,9 @@
                     </div>
                     <div class="kpi-value-box">
                         <span class="kpi-value">{{ dashboard.total }}</span>
+                        {% if dashboard.added_count > 0 %}
+                            <span class="kpi-new-badge">+{{ dashboard.added_count }} added</span>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -258,8 +284,8 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 4.42-3.58 8-8 8a9.86 9.86 0 0 1-5.74-1.83L2 22l3.83-6.26A9.86 9.86 0 0 1 4 12a10 10 0 0 1 8-10z"></path></svg>
                     </div>
                     <div>
-                        <h2>Predict Student Academic Performance</h2>
-                        <p>Input student study and attendance records to forecast final score using trained ML algorithms</p>
+                        <h2>Predict Student Academic Performance &amp; Update Graphs</h2>
+                        <p>Input new student details to forecast final score and dynamically watch the dashboard charts react in real-time!</p>
                     </div>
                 </div>
 
@@ -273,33 +299,33 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="attendance">Attendance Rate (%)</label>
-                                <input type="number" id="attendance" name="attendance" min="0" max="100" step="0.1" value="{{ request.form.get('attendance', '85') }}" required>
+                                <input type="number" id="attendance" name="attendance" min="0" max="100" step="0.1" value="{{ request.form.get('attendance', '88') }}" required>
                             </div>
                             <div class="form-group">
                                 <label for="internal_marks">Internal Marks (Max 25)</label>
-                                <input type="number" id="internal_marks" name="internal_marks" min="0" max="25" step="0.5" value="{{ request.form.get('internal_marks', '20') }}" required>
+                                <input type="number" id="internal_marks" name="internal_marks" min="0" max="25" step="0.5" value="{{ request.form.get('internal_marks', '22') }}" required>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="assignment_score">Assignment Score (Max 20)</label>
-                                <input type="number" id="assignment_score" name="assignment_score" min="0" max="20" step="0.5" value="{{ request.form.get('assignment_score', '16') }}" required>
+                                <input type="number" id="assignment_score" name="assignment_score" min="0" max="20" step="0.5" value="{{ request.form.get('assignment_score', '17') }}" required>
                             </div>
                             <div class="form-group">
                                 <label for="study_hours">Daily Study Hours (0-24 hrs)</label>
-                                <input type="number" id="study_hours" name="study_hours" min="0" max="24" step="0.5" value="{{ request.form.get('study_hours', '3.5') }}" required>
+                                <input type="number" id="study_hours" name="study_hours" min="0" max="24" step="0.5" value="{{ request.form.get('study_hours', '4.5') }}" required>
                             </div>
                         </div>
 
                         <div class="form-group full">
                             <label for="previous_grade">Previous Grade Score (0-100)</label>
-                            <input type="number" id="previous_grade" name="previous_grade" min="0" max="100" step="0.5" value="{{ request.form.get('previous_grade', '72') }}" required>
+                            <input type="number" id="previous_grade" name="previous_grade" min="0" max="100" step="0.5" value="{{ request.form.get('previous_grade', '78') }}" required>
                         </div>
 
                         <button type="submit" class="pred-btn">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                            Run Performance Prediction
+                            Predict Performance &amp; Update Graphs
                         </button>
                     </form>
 
@@ -337,7 +363,7 @@
                             <div class="empty-prediction">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                                 <h4>Ready for Evaluation</h4>
-                                <p style="font-size: 12px; margin-top: 4px;">Fill the student parameters and click Run Performance Prediction to see multi-model output.</p>
+                                <p style="font-size: 12px; margin-top: 4px;">Enter student details and click Predict to see machine learning results and live chart reactions!</p>
                             </div>
                         {% endif %}
                     </div>
@@ -354,17 +380,38 @@
             Chart.defaults.font.size = 11;
             Chart.defaults.color = "#64748b";
 
+            const currentStudent = {{ current_student | tojson | safe }};
+
             // 1. Student Performance Distribution (Bar Chart)
             const ctxPerf = document.getElementById('performanceChart').getContext('2d');
+            const perfLabels = {{ dashboard.perf_labels | tojson }};
+            const perfData = {{ dashboard.perf_values | tojson }};
+            
+            // Highlight the bin of the newly predicted student
+            const perfColors = perfLabels.map((lbl, idx) => {
+                if (currentStudent && idx === currentStudent.perf_bin_idx) {
+                    return '#f59e0b'; // Amber highlight for new student
+                }
+                return '#38bdf8'; // Default cyan
+            });
+
+            const perfBorders = perfLabels.map((lbl, idx) => {
+                if (currentStudent && idx === currentStudent.perf_bin_idx) {
+                    return '#b45309';
+                }
+                return 'transparent';
+            });
+
             new Chart(ctxPerf, {
                 type: 'bar',
                 data: {
-                    labels: {{ dashboard.perf_labels | tojson }},
+                    labels: perfLabels,
                     datasets: [{
                         label: 'Number of Students',
-                        data: {{ dashboard.perf_values | tojson }},
-                        backgroundColor: '#38bdf8',
-                        hoverBackgroundColor: '#0284c7',
+                        data: perfData,
+                        backgroundColor: perfColors,
+                        borderColor: perfBorders,
+                        borderWidth: 2,
                         borderRadius: 4,
                         barPercentage: 0.65
                     }]
@@ -376,7 +423,13 @@
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: (ctx) => ` ${ctx.parsed.y} Students`
+                                label: function(ctx) {
+                                    let text = ` ${ctx.parsed.y} Students`;
+                                    if (currentStudent && ctx.dataIndex === currentStudent.perf_bin_idx) {
+                                        text += " (⭐ Current student added here!)";
+                                    }
+                                    return text;
+                                }
                             }
                         }
                     },
@@ -387,7 +440,7 @@
                         },
                         y: {
                             beginAtZero: true,
-                            max: 60,
+                            suggestedMax: 60,
                             ticks: { stepSize: 10 },
                             grid: { color: '#f1f5f9' },
                             title: {
@@ -451,34 +504,50 @@
                 }
             });
 
-            // 3. Performance vs Attendance (Dual Line Chart)
+            // 3. Performance vs Attendance (Dual Line Chart + Current Student Point)
             const ctxAtt = document.getElementById('attendanceChart').getContext('2d');
+            const attDatasets = [
+                {
+                    label: 'Avg. CGPA',
+                    data: {{ dashboard.att_cgpa_values | tojson }},
+                    borderColor: '#0284c7',
+                    backgroundColor: '#0284c7',
+                    tension: 0.2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2.2
+                },
+                {
+                    label: 'Attendance Rate',
+                    data: {{ dashboard.att_rate_values | tojson }},
+                    borderColor: '#f59e0b',
+                    backgroundColor: '#f59e0b',
+                    tension: 0.2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2.2
+                }
+            ];
+
+            // If a student was just evaluated, plot their specific point
+            if (currentStudent && currentStudent.att_point) {
+                attDatasets.push({
+                    label: '⭐ Current Student',
+                    data: currentStudent.att_point,
+                    borderColor: '#ef4444',
+                    backgroundColor: '#ef4444',
+                    pointRadius: 8,
+                    pointHoverRadius: 11,
+                    pointStyle: 'triangle',
+                    showLine: false
+                });
+            }
+
             new Chart(ctxAtt, {
                 type: 'line',
                 data: {
                     labels: {{ dashboard.att_labels | tojson }},
-                    datasets: [
-                        {
-                            label: 'Avg. CGPA',
-                            data: {{ dashboard.att_cgpa_values | tojson }},
-                            borderColor: '#0284c7',
-                            backgroundColor: '#0284c7',
-                            tension: 0.2,
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            borderWidth: 2.2
-                        },
-                        {
-                            label: 'Attendance Rate',
-                            data: {{ dashboard.att_rate_values | tojson }},
-                            borderColor: '#f59e0b',
-                            backgroundColor: '#f59e0b',
-                            tension: 0.2,
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            borderWidth: 2.2
-                        }
-                    ]
+                    datasets: attDatasets
                 },
                 options: {
                     responsive: true,
@@ -491,6 +560,16 @@
                                 pointStyle: 'circle',
                                 font: { size: 10, weight: 600 },
                                 boxWidth: 8
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    if (ctx.dataset.label === '⭐ Current Student') {
+                                        return ` ⭐ Current Student: ${ctx.parsed.y} CGPA (Attendance: ${currentStudent.attendance}%)`;
+                                    }
+                                    return ` ${ctx.dataset.label}: ${ctx.parsed.y}`;
+                                }
                             }
                         }
                     },
@@ -508,7 +587,12 @@
                             beginAtZero: true,
                             max: 10,
                             ticks: { stepSize: 2 },
-                            grid: { color: '#f1f5f9' }
+                            grid: { color: '#f1f5f9' },
+                            title: {
+                                display: true,
+                                text: 'CGPA / Attendance Scale (0-10)',
+                                font: { size: 10, weight: 600 }
+                            }
                         }
                     }
                 }
@@ -568,29 +652,54 @@
 
             // 5. Psychological Analysis (Radar Chart)
             const ctxPsych = document.getElementById('psychologicalChart').getContext('2d');
+            const psychDatasets = [
+                {
+                    label: 'Cohort Average',
+                    data: {{ dashboard.cohort_psych_values | tojson }},
+                    fill: true,
+                    backgroundColor: 'rgba(56, 189, 248, 0.25)',
+                    borderColor: '#0284c7',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#0284c7',
+                    pointBorderColor: '#ffffff',
+                    pointRadius: 4
+                }
+            ];
+
+            // If a student was just evaluated, overlay their individual psychological profile
+            if (currentStudent && currentStudent.psychology) {
+                psychDatasets.push({
+                    label: '⭐ Current Student',
+                    data: currentStudent.psychology,
+                    fill: true,
+                    backgroundColor: 'rgba(245, 158, 11, 0.35)',
+                    borderColor: '#f59e0b',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#f59e0b',
+                    pointBorderColor: '#ffffff',
+                    pointRadius: 5
+                });
+            }
+
             new Chart(ctxPsych, {
                 type: 'radar',
                 data: {
                     labels: {{ dashboard.psych_labels | tojson }},
-                    datasets: [{
-                        label: 'Student Factor Level',
-                        data: {{ dashboard.psych_values | tojson }},
-                        fill: true,
-                        backgroundColor: 'rgba(56, 189, 248, 0.25)',
-                        borderColor: '#0284c7',
-                        borderWidth: 2,
-                        pointBackgroundColor: '#0284c7',
-                        pointBorderColor: '#ffffff',
-                        pointHoverBackgroundColor: '#ffffff',
-                        pointHoverBorderColor: '#0284c7',
-                        pointRadius: 4
-                    }]
+                    datasets: psychDatasets
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false }
+                        legend: {
+                            display: currentStudent ? true : false,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 8,
+                                font: { size: 10, weight: 600 }
+                            }
+                        }
                     },
                     scales: {
                         r: {
