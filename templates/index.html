@@ -1,247 +1,667 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Academic Performance Prediction</title>
-
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f2f5fb;
-            color: #202b3c;
-            line-height: 1.6;
+    <title>Student Academic Performance Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Chart.js local and CDN fallback -->
+    <script src="/static/js/chart.umd.min.js"></script>
+    <script>
+        if (typeof Chart === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>');
         }
-
-        header {
-            background: linear-gradient(135deg, #172554, #2563eb);
-            color: white;
-            text-align: center;
-            padding: 28px 18px;
-        }
-
-        header h1 { font-size: 28px; margin-bottom: 8px; }
-        header p { color: #dbeafe; }
-
-        .container {
-            max-width: 1050px;
-            margin: 30px auto;
-            padding: 0 18px;
-        }
-
-        .intro { text-align: center; margin-bottom: 25px; }
-        .intro h2 { color: #172554; margin-bottom: 8px; }
-
-        .layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 22px;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 14px;
-            box-shadow: 0 5px 20px rgba(30, 50, 90, 0.08);
-        }
-
-        .card h3 { color: #1d4ed8; margin-bottom: 18px; }
-
-        .form-group { margin-bottom: 17px; }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-
-        input {
-            width: 100%;
-            padding: 11px;
-            border: 1px solid #cbd5e1;
-            border-radius: 7px;
-            font-size: 15px;
-        }
-
-        input:focus {
-            outline: 2px solid #93c5fd;
-            border-color: #2563eb;
-        }
-
-        .hint { display: block; color: #64748b; font-size: 12px; }
-
-        button {
-            width: 100%;
-            padding: 13px;
-            border: none;
-            border-radius: 7px;
-            background: #2563eb;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        button:hover { background: #1d4ed8; }
-
-        .result {
-            border: 1px solid #dbeafe;
-            background: #f8fbff;
-            padding: 18px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .result h4 { color: #172554; margin-bottom: 8px; }
-
-        .mark { font-size: 30px; font-weight: bold; color: #2563eb; }
-
-        .category {
-            display: inline-block;
-            background: #dbeafe;
-            color: #1e40af;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        .empty {
-            color: #64748b;
-            text-align: center;
-            padding: 35px 10px;
-        }
-
-        .error {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 7px;
-            margin-bottom: 15px;
-        }
-
-        .note {
-            margin-top: 20px;
-            color: #64748b;
-            font-size: 12px;
-            text-align: center;
-        }
-
-        footer {
-            text-align: center;
-            padding: 22px;
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        @media (max-width: 720px) {
-            .layout { grid-template-columns: 1fr; }
-            header h1 { font-size: 23px; }
-        }
-    </style>
+    </script>
 </head>
-
 <body>
-    <header>
-        <h1>Student Academic Performance Prediction</h1>
-        <p>Linear Regression &amp; Random Forest Regression</p>
-    </header>
+    <div class="app-layout">
+        <!-- Left Navigation Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                    </svg>
+                </div>
+                <h2>EduAnalytics</h2>
+            </div>
 
-    <main class="container">
-        <section class="intro">
-            <h2>Predict Your Academic Performance</h2>
-            <p>Enter the student details to estimate final marks out of 100.</p>
-        </section>
+            <ul class="sidebar-menu">
+                <li class="active">
+                    <a href="#overview">
+                        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        Overview
+                    </a>
+                </li>
+                <li>
+                    <a href="#performanceSection">
+                        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        Performance
+                    </a>
+                </li>
+                <li>
+                    <a href="#attendanceSection">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        Attendance
+                    </a>
+                </li>
+                <li>
+                    <a href="#dropoutSection">
+                        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        Dropout Analysis
+                    </a>
+                </li>
+                <li>
+                    <a href="#predictionSection">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        ML Prediction
+                    </a>
+                </li>
+            </ul>
 
-        <div class="layout">
-            <section class="card">
-                <h3>Student Details</h3>
+            <div class="sidebar-footer">
+                <p>Edu Data Mining System</p>
+                <p>Version 2.0</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Section -->
+        <main class="main-wrapper" id="overview">
+            <!-- Top Dashboard Header Banner -->
+            <header class="top-header">
+                <div class="header-title-box">
+                    <div class="header-badge-icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1>Student Performance Dashboard</h1>
+                        <p>Insights for Better Learning &nbsp;|&nbsp; Data Driven Decisions</p>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <span class="academic-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                        2024 - 2025
+                    </span>
+                </div>
+            </header>
+
+            <!-- 5 KPI Summary Stat Cards -->
+            <section class="kpi-row">
+                <!-- Card 1: Total Students -->
+                <div class="kpi-card blue">
+                    <div class="kpi-top">
+                        <div class="kpi-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                        <span class="kpi-title">Total Students</span>
+                    </div>
+                    <div class="kpi-value-box">
+                        <span class="kpi-value">{{ dashboard.total }}</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Completed / Not Dropped -->
+                <div class="kpi-card green">
+                    <div class="kpi-top">
+                        <div class="kpi-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+                        </div>
+                        <span class="kpi-title">Completed / Not Dropped</span>
+                    </div>
+                    <div class="kpi-value-box">
+                        <span class="kpi-value">{{ dashboard.completed_count }}</span>
+                        <span class="kpi-sub">({{ dashboard.completed_pct }}%)</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Dropped Out -->
+                <div class="kpi-card dark-blue" id="dropoutSection">
+                    <div class="kpi-top">
+                        <div class="kpi-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"></circle><path d="M12 7v6l4 3"></path><path d="M8 13l4-2 3-5"></path><path d="M6 21l6-5 4 5"></path></svg>
+                        </div>
+                        <span class="kpi-title">Dropped Out</span>
+                    </div>
+                    <div class="kpi-value-box">
+                        <span class="kpi-value">{{ dashboard.dropout_count }}</span>
+                        <span class="kpi-sub">({{ dashboard.dropout_pct }}%)</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: Avg. CGPA -->
+                <div class="kpi-card navy" id="performanceSection">
+                    <div class="kpi-top">
+                        <div class="kpi-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        </div>
+                        <span class="kpi-title">Avg. CGPA</span>
+                    </div>
+                    <div class="kpi-value-box">
+                        <span class="kpi-value">{{ dashboard.avg_cgpa }}</span>
+                        <span class="kpi-sub">/ 10</span>
+                    </div>
+                </div>
+
+                <!-- Card 5: Avg Attendance -->
+                <div class="kpi-card teal" id="attendanceSection">
+                    <div class="kpi-top">
+                        <div class="kpi-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+                        </div>
+                        <span class="kpi-title">Avg. Attendance</span>
+                    </div>
+                    <div class="kpi-value-box">
+                        <span class="kpi-value">{{ dashboard.avg_attendance }}%</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6 Charts in 3x2 Grid (matching user photo) -->
+            <section class="charts-grid">
+                <!-- 1. Student Performance Distribution -->
+                <div class="chart-panel">
+                    <div class="chart-panel-header">
+                        <div class="panel-header-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+                        </div>
+                        <h3>Student Performance Distribution</h3>
+                    </div>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 2. Dropout vs Non-Dropout -->
+                <div class="chart-panel">
+                    <div class="chart-panel-header">
+                        <div class="panel-header-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                        <h3>Dropout vs Non-Dropout</h3>
+                    </div>
+                    <div class="chart-canvas-wrap donut-wrap">
+                        <canvas id="dropoutChart"></canvas>
+                        <div class="donut-center-text">
+                            <div class="cnt">{{ dashboard.total }}</div>
+                            <div class="lbl">Students</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Performance vs. Attendance -->
+                <div class="chart-panel">
+                    <div class="chart-panel-header">
+                        <div class="panel-header-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        </div>
+                        <h3>Performance vs. Attendance</h3>
+                    </div>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 4. Key Factors Affecting Dropout (Correlation Analysis) -->
+                <div class="chart-panel">
+                    <div class="chart-panel-header">
+                        <div class="panel-header-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line><line x1="4.93" y1="19.07" x2="19.07" y2="4.93"></line></svg>
+                        </div>
+                        <h3>Key Factors Affecting Dropout (Correlation Analysis)</h3>
+                    </div>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="factorsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 5. Psychological Analysis -->
+                <div class="chart-panel">
+                    <div class="chart-panel-header">
+                        <div class="panel-header-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </div>
+                        <h3>Psychological Analysis</h3>
+                    </div>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="psychologicalChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 6. Mental Health Status -->
+                <div class="chart-panel">
+                    <div class="chart-panel-header">
+                        <div class="panel-header-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        </div>
+                        <h3>Mental Health Status</h3>
+                    </div>
+                    <div class="chart-canvas-wrap donut-wrap">
+                        <canvas id="mentalHealthChart"></canvas>
+                        <div class="donut-center-text">
+                            <div class="cnt">{{ dashboard.total }}</div>
+                            <div class="lbl">Students</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Machine Learning Performance Prediction Section -->
+            <section class="prediction-section" id="predictionSection">
+                <div class="prediction-header">
+                    <div class="pred-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 4.42-3.58 8-8 8a9.86 9.86 0 0 1-5.74-1.83L2 22l3.83-6.26A9.86 9.86 0 0 1 4 12a10 10 0 0 1 8-10z"></path></svg>
+                    </div>
+                    <div>
+                        <h2>Predict Student Academic Performance</h2>
+                        <p>Input student study and attendance records to forecast final score using trained ML algorithms</p>
+                    </div>
+                </div>
 
                 {% if error %}
-                    <div class="error">{{ error }}</div>
+                    <div class="error-banner">{{ error }}</div>
                 {% endif %}
 
-                <form method="POST" action="/">
-                    <div class="form-group">
-                        <label for="attendance">Attendance (%)</label>
-                        <input type="number" id="attendance" name="attendance"
-                               min="0" max="100" step="0.1"
-                               value="{{ request.form.get('attendance', '85') }}" required>
-                        <span class="hint">Valid range: 0–100%</span>
-                    </div>
+                <div class="prediction-grid">
+                    <!-- Prediction Form -->
+                    <form method="POST" action="/#predictionSection" class="pred-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="attendance">Attendance Rate (%)</label>
+                                <input type="number" id="attendance" name="attendance" min="0" max="100" step="0.1" value="{{ request.form.get('attendance', '85') }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="internal_marks">Internal Marks (Max 25)</label>
+                                <input type="number" id="internal_marks" name="internal_marks" min="0" max="25" step="0.5" value="{{ request.form.get('internal_marks', '20') }}" required>
+                            </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="internal_marks">Internal Marks (out of 25)</label>
-                        <input type="number" id="internal_marks" name="internal_marks"
-                               min="0" max="25" step="0.5"
-                               value="{{ request.form.get('internal_marks', '20') }}" required>
-                    </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="assignment_score">Assignment Score (Max 20)</label>
+                                <input type="number" id="assignment_score" name="assignment_score" min="0" max="20" step="0.5" value="{{ request.form.get('assignment_score', '16') }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="study_hours">Daily Study Hours (0-24 hrs)</label>
+                                <input type="number" id="study_hours" name="study_hours" min="0" max="24" step="0.5" value="{{ request.form.get('study_hours', '3.5') }}" required>
+                            </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="assignment_score">Assignment Score (out of 20)</label>
-                        <input type="number" id="assignment_score" name="assignment_score"
-                               min="0" max="20" step="0.5"
-                               value="{{ request.form.get('assignment_score', '16') }}" required>
-                    </div>
+                        <div class="form-group full">
+                            <label for="previous_grade">Previous Grade Score (0-100)</label>
+                            <input type="number" id="previous_grade" name="previous_grade" min="0" max="100" step="0.5" value="{{ request.form.get('previous_grade', '72') }}" required>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="study_hours">Study Hours per Day</label>
-                        <input type="number" id="study_hours" name="study_hours"
-                               min="0" max="24" step="0.5"
-                               value="{{ request.form.get('study_hours', '3') }}" required>
-                    </div>
+                        <button type="submit" class="pred-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                            Run Performance Prediction
+                        </button>
+                    </form>
 
-                    <div class="form-group">
-                        <label for="previous_grade">Previous Grade (out of 100)</label>
-                        <input type="number" id="previous_grade" name="previous_grade"
-                               min="0" max="100" step="0.5"
-                               value="{{ request.form.get('previous_grade', '70') }}" required>
-                    </div>
+                    <!-- Prediction Results Display -->
+                    <div class="pred-output-box">
+                        {% if prediction %}
+                            <!-- Linear Regression Result -->
+                            <div class="result-card linear">
+                                <div class="result-card-header">
+                                    <span>Linear Regression</span>
+                                    <span class="badge-tag {% if 'High' in prediction.linear_category %}high{% elif 'Medium' in prediction.linear_category %}medium{% else %}low{% endif %}">
+                                        {{ prediction.linear_category }}
+                                    </span>
+                                </div>
+                                <div class="result-score">
+                                    {{ prediction.linear }} <small>/ 100</small>
+                                </div>
+                                <div class="result-sub">Estimated CGPA: <strong>{{ prediction.linear_cgpa }}</strong> / 10</div>
+                            </div>
 
-                    <button type="submit">Predict Performance</button>
-                </form>
+                            <!-- Random Forest Result -->
+                            <div class="result-card forest">
+                                <div class="result-card-header">
+                                    <span>Random Forest Regressor</span>
+                                    <span class="badge-tag {% if 'High' in prediction.forest_category %}high{% elif 'Medium' in prediction.forest_category %}medium{% else %}low{% endif %}">
+                                        {{ prediction.forest_category }}
+                                    </span>
+                                </div>
+                                <div class="result-score">
+                                    {{ prediction.forest }} <small>/ 100</small>
+                                </div>
+                                <div class="result-sub">Estimated CGPA: <strong>{{ prediction.forest_cgpa }}</strong> / 10</div>
+                            </div>
+                        {% else %}
+                            <div class="empty-prediction">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                <h4>Ready for Evaluation</h4>
+                                <p style="font-size: 12px; margin-top: 4px;">Fill the student parameters and click Run Performance Prediction to see multi-model output.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </section>
+        </main>
+    </div>
 
-            <section class="card">
-                <h3>Prediction Results</h3>
+    <!-- Chart Configuration Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Shared styling settings
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.font.size = 11;
+            Chart.defaults.color = "#64748b";
 
-                {% if prediction %}
-                    <div class="result">
-                        <h4>Linear Regression</h4>
-                        <div class="mark">{{ prediction.linear }} / 100</div>
-                        <span class="category">{{ prediction.linear_category }}</span>
-                    </div>
+            // 1. Student Performance Distribution (Bar Chart)
+            const ctxPerf = document.getElementById('performanceChart').getContext('2d');
+            new Chart(ctxPerf, {
+                type: 'bar',
+                data: {
+                    labels: {{ dashboard.perf_labels | tojson }},
+                    datasets: [{
+                        label: 'Number of Students',
+                        data: {{ dashboard.perf_values | tojson }},
+                        backgroundColor: '#38bdf8',
+                        hoverBackgroundColor: '#0284c7',
+                        borderRadius: 4,
+                        barPercentage: 0.65
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.parsed.y} Students`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10, weight: 600 } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 60,
+                            ticks: { stepSize: 10 },
+                            grid: { color: '#f1f5f9' },
+                            title: {
+                                display: true,
+                                text: 'Number of Students',
+                                font: { size: 10, weight: 600 }
+                            }
+                        }
+                    }
+                }
+            });
 
-                    <div class="result">
-                        <h4>Random Forest Regression</h4>
-                        <div class="mark">{{ prediction.forest }} / 100</div>
-                        <span class="category">{{ prediction.forest_category }}</span>
-                    </div>
+            // 2. Dropout vs Non-Dropout (Donut Chart)
+            const ctxDropout = document.getElementById('dropoutChart').getContext('2d');
+            new Chart(ctxDropout, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Non-Dropout', 'Dropout'],
+                    datasets: [{
+                        data: {{ dashboard.dropout_values | tojson }},
+                        backgroundColor: ['#10b981', '#0ea5e9'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { size: 11, weight: 600 },
+                                padding: 16,
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    const total = {{ dashboard.total }};
+                                    return data.labels.map((lbl, idx) => {
+                                        const val = data.datasets[0].data[idx];
+                                        const pct = Math.round((val / total) * 100);
+                                        return {
+                                            text: `${lbl}\n${val} (${pct}%)`,
+                                            fillStyle: data.datasets[0].backgroundColor[idx],
+                                            hidden: false,
+                                            index: idx
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.label}: ${ctx.raw} (${Math.round((ctx.raw / {{ dashboard.total }}) * 100)}%)`
+                            }
+                        }
+                    }
+                }
+            });
 
-                    <p class="note">
-                        These predictions come from a synthetic demonstration dataset
-                        and are not validated estimates of real student performance.
-                    </p>
-                {% else %}
-                    <div class="empty">
-                        <p>Your predictions will appear here.</p>
-                        <p>Enter all five details and click Predict Performance.</p>
-                    </div>
-                {% endif %}
-            </section>
-        </div>
+            // 3. Performance vs Attendance (Dual Line Chart)
+            const ctxAtt = document.getElementById('attendanceChart').getContext('2d');
+            new Chart(ctxAtt, {
+                type: 'line',
+                data: {
+                    labels: {{ dashboard.att_labels | tojson }},
+                    datasets: [
+                        {
+                            label: 'Avg. CGPA',
+                            data: {{ dashboard.att_cgpa_values | tojson }},
+                            borderColor: '#0284c7',
+                            backgroundColor: '#0284c7',
+                            tension: 0.2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            borderWidth: 2.2
+                        },
+                        {
+                            label: 'Attendance Rate',
+                            data: {{ dashboard.att_rate_values | tojson }},
+                            borderColor: '#f59e0b',
+                            backgroundColor: '#f59e0b',
+                            tension: 0.2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            borderWidth: 2.2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { size: 10, weight: 600 },
+                                boxWidth: 8
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10, weight: 600 } },
+                            title: {
+                                display: true,
+                                text: 'Attendance Rate (%)',
+                                font: { size: 10, weight: 600 }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: { stepSize: 2 },
+                            grid: { color: '#f1f5f9' }
+                        }
+                    }
+                }
+            });
 
-        <p class="note">
-            Educational Data Mining | Student Academic Performance Project
-        </p>
-    </main>
+            // 4. Key Factors Affecting Dropout (Horizontal Bar Chart)
+            const ctxFactors = document.getElementById('factorsChart').getContext('2d');
+            const factorVals = {{ dashboard.factor_values | tojson }};
+            const factorColors = factorVals.map(val => val >= 0 ? '#38bdf8' : '#f472b6');
 
-    <footer>
-        Student Academic Performance Prediction | Machine Learning Project
-    </footer>
+            new Chart(ctxFactors, {
+                type: 'bar',
+                data: {
+                    labels: {{ dashboard.factor_labels | tojson }},
+                    datasets: [{
+                        label: 'Correlation with Dropout',
+                        data: factorVals,
+                        backgroundColor: factorColors,
+                        borderRadius: 4,
+                        barPercentage: 0.7
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` Correlation: ${ctx.parsed.x > 0 ? '+' : ''}${ctx.parsed.x}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            min: -0.8,
+                            max: 0.8,
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                font: { size: 9 },
+                                stepSize: 0.2
+                            },
+                            title: {
+                                display: true,
+                                text: 'Correlation with Performance / Retention',
+                                font: { size: 9, weight: 600 }
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { font: { size: 9, weight: 600 } }
+                        }
+                    }
+                }
+            });
+
+            // 5. Psychological Analysis (Radar Chart)
+            const ctxPsych = document.getElementById('psychologicalChart').getContext('2d');
+            new Chart(ctxPsych, {
+                type: 'radar',
+                data: {
+                    labels: {{ dashboard.psych_labels | tojson }},
+                    datasets: [{
+                        label: 'Student Factor Level',
+                        data: {{ dashboard.psych_values | tojson }},
+                        fill: true,
+                        backgroundColor: 'rgba(56, 189, 248, 0.25)',
+                        borderColor: '#0284c7',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#0284c7',
+                        pointBorderColor: '#ffffff',
+                        pointHoverBackgroundColor: '#ffffff',
+                        pointHoverBorderColor: '#0284c7',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 1.0,
+                            ticks: {
+                                stepSize: 0.2,
+                                display: false
+                            },
+                            pointLabels: {
+                                font: { size: 10, weight: 600 },
+                                color: '#475569'
+                            },
+                            grid: { color: '#e2e8f0' },
+                            angleLines: { color: '#e2e8f0' }
+                        }
+                    }
+                }
+            });
+
+            // 6. Mental Health Status (Donut Chart)
+            const ctxMental = document.getElementById('mentalHealthChart').getContext('2d');
+            new Chart(ctxMental, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Low Risk', 'Moderate Risk', 'High Risk'],
+                    datasets: [{
+                        data: {{ dashboard.mental_values | tojson }},
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { size: 11, weight: 600 },
+                                padding: 14,
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    const total = {{ dashboard.total }};
+                                    return data.labels.map((lbl, idx) => {
+                                        const val = data.datasets[0].data[idx];
+                                        const pct = Math.round((val / total) * 100);
+                                        return {
+                                            text: `${lbl}\n${val} (${pct}%)`,
+                                            fillStyle: data.datasets[0].backgroundColor[idx],
+                                            hidden: false,
+                                            index: idx
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.label}: ${ctx.raw} (${Math.round((ctx.raw / {{ dashboard.total }}) * 100)}%)`
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
